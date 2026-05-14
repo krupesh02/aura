@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -25,6 +25,7 @@ async function request<T>(
     headers["Content-Type"] = "application/json";
   }
 
+  console.log(`[API] Fetching: ${API_URL}${endpoint}`);
   const res = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers,
@@ -71,9 +72,27 @@ export const api = {
     me: () => request<User>("/api/auth/me"),
   },
 
-  // ===== Events =====
+  // ===== Client Folders =====
+  folders: {
+    create: (data: { name: string; description?: string; price?: number; isPaid?: boolean; whatsappNo?: string }) =>
+      request<any>("/api/folders/", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    list: () => request<any[]>("/api/folders/"),
+    get: (id: string) => request<any>(`/api/folders/${id}`),
+    update: (id: string, data: any) =>
+      request<any>(`/api/folders/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) =>
+      request<any>(`/api/folders/${id}`, { method: "DELETE" }),
+  },
+
+  // ===== Events (Sub-events) =====
   events: {
-    create: (data: { name: string; description?: string; eventDate?: string }) =>
+    create: (data: { clientFolderId: string; name: string; description?: string; eventDate?: string }) =>
       request<any>("/api/events/", {
         method: "POST",
         body: JSON.stringify(data),
@@ -112,6 +131,25 @@ export const api = {
       request<any>(`/api/photos/${id}`, { method: "DELETE" }),
   },
 
+  // ===== Payments =====
+  payments: {
+    createOrder: (data: { clientFolderId?: string; amount: number; guestName: string; paymentType?: string }) =>
+      request<any>("/api/payments/create-order", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    verify: (data: {
+      razorpay_order_id: string;
+      razorpay_payment_id: string;
+      razorpay_signature: string;
+      clientFolderId?: string;
+    }) =>
+      request<any>("/api/payments/verify", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+  },
+
   // ===== Search =====
   search: {
     byFace: (file: File, eventId?: string) => {
@@ -127,12 +165,52 @@ export const api = {
 
   // ===== Public (No Auth Required) =====
   public: {
+    getFolder: (id: string) => request<any>(`/api/folders/${id}/public`),
     getEvent: (id: string) => request<any>(`/api/events/${id}/public`),
-    searchFace: (eventId: string, file: File) => {
+    getEventPhotos: (id: string, page = 1, pageSize = 100) =>
+      request<any>(`/api/photos/public/event/${id}?page=${page}&page_size=${pageSize}`),
+    getFolderPhotos: (id: string, page = 1, pageSize = 200) =>
+      request<any>(`/api/photos/public/folder/${id}?page=${page}&page_size=${pageSize}`),
+    searchPhotosByFace: (file: File, folderId?: string) => {
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("event_id", eventId);
+      
+      if (folderId) {
+        formData.append("folder_id", folderId);
+        return request<any[]>("/api/search/public/face", {
+          method: "POST",
+          body: formData,
+        });
+      } else {
+        return request<any[]>("/api/search/public/events-by-face", {
+          method: "POST",
+          body: formData,
+        });
+      }
+    },
+    // Keep this for backward compatibility if needed
+    searchFace: (folderId: string, file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("folder_id", folderId);
       return request<any[]>("/api/search/public/face", {
+        method: "POST",
+        body: formData,
+      });
+    },
+    searchEventsByFace: (file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      return request<{ totalMatches: number; folderSummaries: any[]; tempSelfieId: string }>("/api/search/public/events-by-face", {
+        method: "POST",
+        body: formData,
+      });
+    },
+    getUnifiedGallery: (file: File, guestToken: string) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("guest_token", guestToken);
+      return request<any[]>("/api/search/public/unified-gallery", {
         method: "POST",
         body: formData,
       });

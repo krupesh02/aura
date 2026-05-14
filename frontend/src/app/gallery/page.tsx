@@ -10,6 +10,7 @@ import { PageLoader, GridSkeleton } from "@/components/ui/Loader";
 import { api } from "@/lib/api";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { Filter, ChevronDown } from "lucide-react";
 
 export default function GalleryPage() {
   const { user, loading: authLoading } = useAuth();
@@ -39,68 +40,69 @@ export default function GalleryPage() {
       const allPhotos: any[] = [];
       for (const ev of eventsToLoad) {
         try {
-          const res = await api.photos.listByEvent(ev.id, 1, 100);
+          const res = await api.photos.listByEvent(ev.id, 1, 500);
           allPhotos.push(...(res.photos || []));
         } catch {}
       }
+      // Sort by date desc
+      allPhotos.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       setPhotos(allPhotos);
       setLoading(false);
     };
 
     if (events.length > 0) loadPhotos();
-    else setLoading(false);
+    else if (events.length === 0 && !loading) setLoading(false);
   }, [user, events, selectedEvent]);
 
   if (authLoading || !user) return <PageLoader />;
 
   return (
-    <div style={{ background: "hsl(var(--bg))" }}>
+    <div className="min-h-screen" style={{ background: "#FDFBF7" }}>
       <Navbar />
       <div className="flex pt-16">
         <Sidebar />
-        <main className="flex-1 p-6 lg:p-8 min-h-[calc(100vh-4rem)]">
-          <div className="flex items-center justify-between mb-8">
+        <main className="flex-1 p-8 lg:p-12">
+          {/* Gallery Header */}
+          <div className="flex items-center justify-between mb-12">
             <div>
-              <h1 className="text-2xl font-bold" style={{ color: "hsl(var(--text))" }}>
-                Gallery
-              </h1>
-              <p className="text-sm mt-1" style={{ color: "hsl(var(--text-muted))" }}>
-                {photos.length} photos across {events.length} events
+              <h1 className="text-4xl font-serif-aesthetic italic text-[#4A443A] mb-2">Gallery</h1>
+              <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-[#827A6E]">
+                {photos.length} moments captured
               </p>
             </div>
 
-            <select
-              value={selectedEvent}
-              onChange={(e) => setSelectedEvent(e.target.value)}
-              className="px-4 py-2 rounded-xl text-sm outline-none"
-              style={{
-                background: "hsl(var(--surface))",
-                border: "1px solid hsl(var(--border))",
-                color: "hsl(var(--text))",
-              }}
-            >
-              <option value="all">All Events</option>
-              {events.map((ev) => (
-                <option key={ev.id} value={ev.id}>
-                  {ev.name}
-                </option>
-              ))}
-            </select>
+            <div className="relative group">
+                <select
+                    value={selectedEvent}
+                    onChange={(e) => setSelectedEvent(e.target.value)}
+                    className="appearance-none pl-10 pr-12 py-3.5 rounded-2xl text-[10px] font-bold uppercase tracking-widest bg-white border border-[#E8E2D6] text-[#4A443A] outline-none transition-all hover:border-[#D2A078] cursor-pointer shadow-sm"
+                >
+                    <option value="all">All Events</option>
+                    {events.map((ev) => (
+                        <option key={ev.id} value={ev.id}>
+                            {ev.name}
+                        </option>
+                    ))}
+                </select>
+                <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#D2A078]" />
+                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#827A6E]" />
+            </div>
           </div>
 
           {loading ? (
-            <GridSkeleton count={12} />
+            <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
+                {[1,2,3,4,5,6].map(i => (
+                    <div key={i} className="w-full aspect-[3/4] bg-white border border-[#E8E2D6] rounded-[2.5rem] animate-pulse" />
+                ))}
+            </div>
           ) : photos.length === 0 ? (
-            <div
-              className="text-center py-20 rounded-2xl border"
-              style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--surface))" }}
-            >
-              <p className="text-sm" style={{ color: "hsl(var(--text-muted))" }}>
-                No photos found. Upload some to your events!
+            <div className="text-center py-40 rounded-[3rem] border border-dashed border-[#E8E2D6] bg-white/50">
+              <p className="text-sm font-light text-[#827A6E]">
+                No moments found in this collection.
               </p>
             </div>
           ) : (
-            <div className="masonry-grid">
+            <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
               {photos.map((photo, i) => (
                 <ImageCard
                   key={photo.id}

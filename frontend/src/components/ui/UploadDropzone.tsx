@@ -56,19 +56,15 @@ export function UploadDropzone({ onUpload, accept = "image/*", multiple = true }
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Drop Area */}
       <div
         onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
-        className={`relative rounded-2xl border-2 border-dashed p-8 text-center transition-all cursor-pointer ${
-          dragging ? "scale-[1.02]" : ""
+        className={`relative rounded-[2.5rem] border-2 border-dashed p-16 text-center transition-all cursor-pointer group ${
+          dragging ? "border-[#D2A078] bg-[#FDFBF7]" : "border-[#E8E2D6] bg-white hover:border-[#D2A078]"
         }`}
-        style={{
-          borderColor: dragging ? "hsl(var(--primary))" : "hsl(var(--border))",
-          background: dragging ? "hsl(var(--primary) / 0.05)" : "hsl(var(--surface))",
-        }}
         onClick={() => document.getElementById("file-input")?.click()}
       >
         <input
@@ -79,56 +75,56 @@ export function UploadDropzone({ onUpload, accept = "image/*", multiple = true }
           onChange={handleSelect}
           className="hidden"
         />
-        <Upload
-          className="w-10 h-10 mx-auto mb-3"
-          style={{ color: "hsl(var(--primary))" }}
-        />
-        <p className="font-semibold text-sm" style={{ color: "hsl(var(--text))" }}>
+        <div className="w-16 h-16 rounded-full bg-[#F5F1E1] flex items-center justify-center mx-auto mb-6 transition-transform group-hover:scale-110">
+          <Upload className="w-6 h-6 text-[#D2A078]" />
+        </div>
+        <p className="text-xl font-medium text-[#4A443A]">
           Drag & drop photos here
         </p>
-        <p className="text-xs mt-1" style={{ color: "hsl(var(--text-muted))" }}>
+        <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#827A6E] mt-2">
           or click to browse · JPG, PNG, WEBP
         </p>
       </div>
 
       {/* File List */}
-      <AnimatePresence>
-        {files.map((item, idx) => (
-          <motion.div
-            key={idx}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="flex items-center gap-3 p-3 rounded-xl"
-            style={{ background: "hsl(var(--surface))", border: "1px solid hsl(var(--border-light))" }}
-          >
-            <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0" style={{ background: "hsl(var(--bg-secondary))" }}>
-              <img
-                src={URL.createObjectURL(item.file)}
-                alt=""
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate" style={{ color: "hsl(var(--text))" }}>
-                {item.file.name}
-              </p>
-              <p className="text-xs" style={{ color: "hsl(var(--text-muted))" }}>
-                {(item.file.size / 1024 / 1024).toFixed(2)} MB
-              </p>
-            </div>
-            <div className="flex-shrink-0">
-              {item.status === "uploading" && <Loader2 className="w-5 h-5 animate-spin" style={{ color: "hsl(var(--primary))" }} />}
-              {item.status === "done" && <CheckCircle className="w-5 h-5" style={{ color: "hsl(var(--success))" }} />}
-              {item.status === "error" && (
-                <button onClick={() => removeFile(idx)}>
-                  <X className="w-5 h-5" style={{ color: "hsl(var(--error))" }} />
-                </button>
-              )}
-            </div>
-          </motion.div>
-        ))}
-      </AnimatePresence>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <AnimatePresence>
+            {files.map((item, idx) => (
+            <motion.div
+                key={idx}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-[#E8E2D6] shadow-sm"
+            >
+                <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-[#F5F1E1]">
+                <img
+                    src={URL.createObjectURL(item.file)}
+                    alt=""
+                    className="w-full h-full object-cover"
+                />
+                </div>
+                <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-bold text-[#4A443A] truncate uppercase tracking-widest">
+                    {item.file.name}
+                </p>
+                <p className="text-[10px] text-[#827A6E] uppercase tracking-tighter">
+                    {(item.file.size / 1024 / 1024).toFixed(2)} MB
+                </p>
+                </div>
+                <div className="flex-shrink-0">
+                {item.status === "uploading" && <Loader2 className="w-5 h-5 animate-spin text-[#D2A078]" />}
+                {item.status === "done" && <CheckCircle className="w-5 h-5 text-[#2E7D32]" />}
+                {item.status === "error" && (
+                    <button onClick={() => removeFile(idx)}>
+                    <X className="w-5 h-5 text-red-500" />
+                    </button>
+                )}
+                </div>
+            </motion.div>
+            ))}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

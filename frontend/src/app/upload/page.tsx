@@ -9,6 +9,7 @@ import { api } from "@/lib/api";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { PageLoader } from "@/components/ui/Loader";
+import { ChevronDown, Calendar } from "lucide-react";
 
 export default function UploadPage() {
   const { user, loading: authLoading } = useAuth();
@@ -23,9 +24,22 @@ export default function UploadPage() {
 
   useEffect(() => {
     if (user) {
-      api.events.list().then((e) => {
-        setEvents(e);
-        if (e.length > 0) setSelectedEvent(e[0].id);
+      api.folders.list().then((folders) => {
+        const flatEvents: any[] = [];
+        folders.forEach((folder) => {
+          if (folder.events) {
+            folder.events.forEach((ev: any) => {
+              if (ev.status !== "DELETED") {
+                flatEvents.push({
+                  ...ev,
+                  displayName: `${folder.name} — ${ev.name}`
+                });
+              }
+            });
+          }
+        });
+        setEvents(flatEvents);
+        if (flatEvents.length > 0) setSelectedEvent(flatEvents[0].id);
       }).catch(console.error).finally(() => setLoading(false));
     }
   }, [user]);
@@ -40,52 +54,51 @@ export default function UploadPage() {
   };
 
   return (
-    <div style={{ background: "hsl(var(--bg))" }}>
+    <div className="min-h-screen" style={{ background: "#FDFBF7" }}>
       <Navbar />
       <div className="flex pt-16">
         <Sidebar />
-        <main className="flex-1 p-6 lg:p-8 min-h-[calc(100vh-4rem)]">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mx-auto">
-            <h1 className="text-2xl font-bold mb-2" style={{ color: "hsl(var(--text))" }}>
-              Upload Photos
-            </h1>
-            <p className="text-sm mb-8" style={{ color: "hsl(var(--text-muted))" }}>
-              Select an event and upload your photos. Our AI will automatically detect faces.
-            </p>
+        <main className="flex-1 p-8 lg:p-12">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
+            {/* Header */}
+            <div className="mb-16 text-center">
+              <h1 className="text-5xl font-serif-aesthetic italic text-[#4A443A] mb-4">
+                Upload Photos
+              </h1>
+              <p className="text-lg text-[#827A6E] font-light">
+                Select an event and upload your photos. Our AI will automatically detect faces.
+              </p>
+            </div>
 
             {/* Event Selector */}
-            <div className="mb-6">
-              <label className="text-xs font-semibold mb-1.5 block" style={{ color: "hsl(var(--text-secondary))" }}>
-                Select Event
+            <div className="mb-12 max-w-md mx-auto">
+              <label className="text-[10px] uppercase tracking-[0.3em] font-bold text-[#827A6E] mb-3 block text-center">
+                Select Target Event
               </label>
-              <select
-                value={selectedEvent}
-                onChange={(e) => setSelectedEvent(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-                style={{
-                  background: "hsl(var(--surface))",
-                  border: "1px solid hsl(var(--border))",
-                  color: "hsl(var(--text))",
-                }}
-              >
-                {events.map((ev) => (
-                  <option key={ev.id} value={ev.id}>
-                    {ev.name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                    value={selectedEvent}
+                    onChange={(e) => setSelectedEvent(e.target.value)}
+                    className="w-full appearance-none pl-12 pr-12 py-5 rounded-2xl text-xs font-bold uppercase tracking-widest bg-white border border-[#E8E2D6] text-[#4A443A] outline-none transition-all focus:border-[#D2A078] cursor-pointer shadow-sm"
+                >
+                    {events.map((ev) => (
+                    <option key={ev.id} value={ev.id}>
+                        {ev.displayName}
+                    </option>
+                    ))}
+                </select>
+                <Calendar className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#D2A078]" />
+                <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#827A6E]" />
+              </div>
             </div>
 
             {/* Upload Area */}
             {selectedEvent ? (
               <UploadDropzone onUpload={handleUpload} />
             ) : (
-              <div
-                className="text-center py-12 rounded-2xl border"
-                style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--surface))" }}
-              >
-                <p className="text-sm" style={{ color: "hsl(var(--text-muted))" }}>
-                  Create an event first to upload photos.
+              <div className="text-center py-24 rounded-[3.5rem] border-2 border-dashed border-[#E8E2D6] bg-white/50">
+                <p className="text-sm font-light text-[#827A6E]">
+                  Please create an event first to start uploading photos.
                 </p>
               </div>
             )}

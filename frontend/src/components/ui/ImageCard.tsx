@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Download, Eye, Trash2, Loader2 } from "lucide-react";
+import { Download, Eye, Trash2, Loader2, Maximize2 } from "lucide-react";
 import { useState } from "react";
 
 interface Props {
@@ -29,7 +29,6 @@ export function ImageCard({ url, thumbnailUrl, id, onView, onDelete, similarity 
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = blobUrl;
-      // Extract filename from URL or use a default
       const filename = url.split("/").pop()?.split("?")[0] || "photo.jpg";
       a.download = filename;
       document.body.appendChild(a);
@@ -38,7 +37,6 @@ export function ImageCard({ url, thumbnailUrl, id, onView, onDelete, similarity 
       URL.revokeObjectURL(blobUrl);
     } catch (err) {
       console.error("Download failed:", err);
-      // Fallback: open in new tab
       window.open(url, "_blank");
     } finally {
       setDownloading(false);
@@ -47,58 +45,49 @@ export function ImageCard({ url, thumbnailUrl, id, onView, onDelete, similarity 
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3 }}
-      className="group relative rounded-2xl overflow-hidden cursor-pointer"
-      style={{ boxShadow: "var(--shadow-md)" }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="group relative rounded-[2.5rem] overflow-hidden cursor-pointer bg-white mb-6"
+      style={{ boxShadow: "0 20px 40px -10px rgba(0,0,0,0.05)" }}
       onClick={onView}
     >
-      {/* Shimmer placeholder */}
-      {!loaded && (
-        <div
-          className="absolute inset-0 animate-shimmer rounded-2xl"
-          style={{ background: "hsl(var(--bg-secondary))", minHeight: "200px" }}
-        />
-      )}
-
       <img
         src={thumbnailUrl || url}
         alt=""
-        className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-110"
+        className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
         style={{ minHeight: "120px" }}
         onLoad={() => setLoaded(true)}
-        onError={(e) => {
-          // If thumbnail fails, try the full URL
-          const target = e.target as HTMLImageElement;
-          if (target.src !== url) {
-            target.src = url;
-          }
-        }}
         loading="lazy"
         referrerPolicy="no-referrer"
       />
 
-      {/* Hover overlay */}
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-end">
-        <div className="w-full p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-between">
-          {similarity !== undefined && (
-            <span className="text-xs font-semibold text-white bg-white/20 backdrop-blur-sm px-2 py-1 rounded-lg">
-              {Math.round(similarity * 100)}% match
-            </span>
-          )}
-          <div className="flex gap-1 ml-auto">
+      {/* Hover Overlay */}
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-500 flex flex-col justify-between p-6">
+        <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+            {similarity !== undefined && (
+                <span className="text-[10px] font-bold uppercase tracking-widest text-white bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full">
+                    {Math.round(similarity * 100)}% match
+                </span>
+            )}
+        </div>
+        
+        <div className="flex items-center justify-between translate-y-12 group-hover:translate-y-0 transition-transform duration-500">
+          <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/20">
+            <Maximize2 className="w-4 h-4" />
+          </div>
+          
+          <div className="flex gap-2">
             <button
               onClick={handleDownload}
               disabled={downloading}
-              className="p-2 rounded-xl bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-colors disabled:opacity-50"
+              className="p-3 rounded-full bg-white text-black hover:scale-110 transition-transform disabled:opacity-50 shadow-lg"
             >
               {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
             </button>
             {onDelete && (
               <button
                 onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                className="p-2 rounded-xl bg-red-500/70 backdrop-blur-sm text-white hover:bg-red-500/90 transition-colors"
+                className="p-3 rounded-full bg-red-500 text-white hover:scale-110 transition-transform shadow-lg"
               >
                 <Trash2 className="w-4 h-4" />
               </button>

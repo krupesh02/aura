@@ -9,8 +9,11 @@ class PhotoResponse(BaseModel):
     faceCount: int = 0
     width: Optional[int] = None
     height: Optional[int] = None
+    folderName: Optional[str] = "General"
     createdAt: datetime
     eventId: str
+
+    model_config = {"from_attributes": True}
 
 class PhotoSearchResult(BaseModel):
     photo: PhotoResponse

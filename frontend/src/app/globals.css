@@ -1,189 +1,80 @@
 @import "tailwindcss";
 
-/* ====== Design System Variables ====== */
+/* ====== Design System: AURA (Ocean/Beach Edition) ====== */
 :root {
-  /* Primary palette */
+  /* Aura Gold/Sand */
+  --aura-gold: 245 241 225; /* #F5F1E1 */
+  --aura-accent: 217 197 163; /* #D9C5A3 */
+  
+  /* Deep Ocean Palette */
   --primary: 228 94% 57%;
-  --primary-light: 228 94% 72%;
-  --primary-dark: 228 94% 42%;
-
-  /* Accent */
-  --accent: 270 80% 60%;
-  --accent-light: 270 80% 75%;
-
-  /* Neutral */
-  --bg: 220 20% 97%;
-  --bg-secondary: 220 20% 94%;
-  --surface: 0 0% 100%;
-  --surface-hover: 220 20% 96%;
-  --text: 220 30% 10%;
-  --text-secondary: 220 15% 45%;
-  --text-muted: 220 10% 65%;
-  --border: 220 15% 88%;
-  --border-light: 220 15% 92%;
-
-  /* Semantic */
-  --success: 152 70% 45%;
-  --warning: 38 95% 55%;
-  --error: 0 85% 55%;
-
-  /* Shadows */
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
-  --shadow-lg: 0 10px 25px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
-  --shadow-xl: 0 20px 45px -8px rgb(0 0 0 / 0.12);
-  --shadow-glow: 0 0 40px -8px hsl(228 94% 57% / 0.3);
-
-  /* Glass */
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.5);
-  --glass-blur: 16px;
+  --bg: 0 0% 0%;
+  --surface: 240 10% 4%;
+  --text: 0 0% 100%;
+  --text-muted: 0 0% 60%;
+  
+  /* Shadows & Glass */
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  --shadow-glow: 0 0 40px -8px rgba(217, 197, 163, 0.2);
 }
 
-.dark {
-  --bg: 222 25% 6%;
-  --bg-secondary: 222 25% 9%;
-  --surface: 222 25% 11%;
-  --surface-hover: 222 25% 14%;
-  --text: 220 15% 95%;
-  --text-secondary: 220 10% 65%;
-  --text-muted: 220 10% 45%;
-  --border: 222 20% 18%;
-  --border-light: 222 20% 14%;
-
-  --glass-bg: rgba(15, 17, 25, 0.75);
-  --glass-border: rgba(255, 255, 255, 0.08);
-
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.2);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
-  --shadow-lg: 0 10px 25px -3px rgb(0 0 0 / 0.35);
-  --shadow-xl: 0 20px 45px -8px rgb(0 0 0 / 0.45);
-  --shadow-glow: 0 0 40px -8px hsl(228 94% 57% / 0.2);
+@layer base {
+  body {
+    @apply bg-black text-white antialiased selection:bg-[#D9C5A3] selection:text-black;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv11";
+  }
 }
 
-/* ====== Base ====== */
-* {
-  box-sizing: border-box;
+@layer utilities {
+  .font-serif-aesthetic {
+    font-family: var(--font-dm-serif), serif;
+  }
+  
+  .glass {
+    @apply bg-white/5 backdrop-blur-2xl border border-white/10;
+  }
+  
+  .glass-dark {
+    @apply bg-black/40 backdrop-blur-3xl border border-white/5;
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-[#F5F1E1] to-[#D9C5A3];
+  }
+
+  .gradient-bg {
+    @apply bg-gradient-to-br from-[#F5F1E1] to-[#D9C5A3];
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .animate-spin-slow {
+    animation: spin 8s linear infinite;
+  }
 }
 
-body {
-  background-color: hsl(var(--bg));
-  color: hsl(var(--text));
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-/* ====== Scrollbar ====== */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
-  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--text-muted) / 0.3);
-  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--text-muted) / 0.5);
-}
-
-/* ====== Utility Classes ====== */
-.glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border);
-}
-
-.glass-strong {
-  background: var(--glass-bg);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--glass-border);
-}
-
-.gradient-text {
-  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.gradient-bg {
-  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
-}
-
-.gradient-border {
-  position: relative;
-  border: none;
-}
-.gradient-border::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  padding: 1px;
-  border-radius: inherit;
-  background: linear-gradient(135deg, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.5));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
-/* ====== Animations ====== */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-12px); }
-}
-
-@keyframes shimmer {
-  0% { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px -8px hsl(var(--primary) / 0.3); }
-  50% { box-shadow: 0 0 35px -4px hsl(var(--primary) / 0.5); }
-}
-
-@keyframes scanLine {
-  0%, 100% { transform: translateY(-100%); }
-  50% { transform: translateY(100%); }
-}
-
-@keyframes cameraPulse {
-  0%, 100% { transform: scale(1); opacity: 0.5; }
-  50% { transform: scale(1.08); opacity: 0; }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-shimmer {
-  background: linear-gradient(90deg, transparent 0%, hsl(var(--surface-hover)) 50%, transparent 100%);
-  background-size: 800px 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
-}
-
-/* ====== Masonry Grid ====== */
-.masonry-grid {
-  columns: 2;
-  column-gap: 1rem;
-}
-@media (min-width: 768px) {
-  .masonry-grid { columns: 3; }
-}
-@media (min-width: 1024px) {
-  .masonry-grid { columns: 4; }
-}
-.masonry-grid > * {
-  break-inside: avoid;
-  margin-bottom: 1rem;
+  background: rgba(255, 255, 255, 0.2);
 }

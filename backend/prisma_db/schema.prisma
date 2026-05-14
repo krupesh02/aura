@@ -1,0 +1,119 @@
+generator client {
+  provider             = "prisma-client-py"
+  interface            = "asyncio"
+  recursive_type_depth = 5
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String   @id @default(uuid()) @db.Uuid
+  email          String   @unique
+  name           String
+  hashedPassword String   @map("hashed_password")
+  avatarUrl      String?  @map("avatar_url")
+  role           Role     @default(USER)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  clientFolders  ClientFolder[]
+  photos         Photo[]
+
+  @@map("users")
+}
+
+/// A Client Folder groups multiple sub-events for one client/shoot.
+/// Payment & WhatsApp details are set at this level.
+model ClientFolder {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String                          // e.g. "Rahul & Priya Wedding"
+  description String?
+  coverUrl    String?  @map("cover_url")
+  price       Float    @default(0)            // Amount guests pay to unlock their photos
+  isPaid      Boolean  @default(false) @map("is_paid")  // true = payment required
+  whatsappNo  String?  @map("whatsapp_no")    // Photographer's WhatsApp for notifications
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  events   Event[]
+  payments Payment[]
+
+  @@map("client_folders")
+}
+
+/// A sub-event inside a ClientFolder (e.g. "Haldi", "Reception").
+model Event {
+  id          String      @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  coverUrl    String?     @map("cover_url")
+  eventDate   DateTime?   @map("event_date")
+  status      EventStatus @default(ACTIVE)
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  clientFolderId String       @map("client_folder_id") @db.Uuid
+  clientFolder   ClientFolder @relation(fields: [clientFolderId], references: [id], onDelete: Cascade)
+
+  photos Photo[]
+
+  @@map("events")
+}
+
+model Photo {
+  id             String   @id @default(uuid()) @db.Uuid
+  url            String
+  publicId       String?  @map("public_id")
+  thumbnailUrl   String?  @map("thumbnail_url")
+  faceEmbeddings Json?    @map("face_embeddings")
+  faceCount      Int      @default(0) @map("face_count")
+  width          Int?
+  height         Int?
+  folderName     String?  @default("General") @map("folder_name")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  eventId String @map("event_id") @db.Uuid
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  uploadedById String @map("uploaded_by_id") @db.Uuid
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+
+  @@map("photos")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum EventStatus {
+  ACTIVE
+  ARCHIVED
+  DELETED
+}
+
+/// Payment is linked to a ClientFolder — one payment unlocks all sub-events.
+model Payment {
+  id                String   @id @default(uuid()) @db.Uuid
+  razorpayOrderId   String   @unique @map("razorpay_order_id")
+  razorpayPaymentId String?  @unique @map("razorpay_payment_id")
+  amount            Float
+  status            String   @default("PENDING") // PENDING, SUCCESS, FAILED
+  guestName         String?  @map("guest_name")
+  guestEmail        String?  @map("guest_email")
+  guestToken        String?  @unique @map("guest_token")
+  paymentType       String   @default("FOLDER") @map("payment_type") // FOLDER, GLOBAL
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  clientFolderId String?       @map("client_folder_id") @db.Uuid
+  clientFolder   ClientFolder? @relation(fields: [clientFolderId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}

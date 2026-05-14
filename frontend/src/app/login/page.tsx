@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Camera, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { Mail, Lock, ArrowRight, Loader2, Aperture } from "lucide-react";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -30,100 +30,114 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden" style={{ background: "hsl(var(--bg))" }}>
-      {/* Background blobs */}
-      <div className="absolute top-0 left-0 w-96 h-96 rounded-full blur-[150px] opacity-20" style={{ background: "hsl(var(--primary))" }} />
-      <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full blur-[150px] opacity-15" style={{ background: "hsl(var(--accent))" }} />
+    <div className="min-h-screen relative flex items-center justify-center overflow-hidden">
+      {/* Background Video */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover z-0 scale-105"
+      >
+        <source src="/login-video.mp4" type="video/mp4" />
+      </video>
+      <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] z-10" />
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-20 w-full max-w-lg px-6"
       >
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center shadow-lg">
-              <Camera className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-2xl font-bold gradient-text">PhotoAI</span>
+        {/* Header */}
+        <div className="text-center mb-10">
+          <Link href="/" className="inline-flex items-center justify-center gap-3 mb-6 group cursor-pointer">
+            <motion.div 
+              whileHover={{ rotate: 90 }}
+              transition={{ duration: 0.5, ease: "anticipate" }}
+              className="w-10 h-10 rounded-xl bg-black/80 flex items-center justify-center border border-white/20 shadow-lg"
+            >
+              <Aperture className="w-5 h-5 text-white" />
+            </motion.div>
+            <span className="text-xl font-black uppercase tracking-[0.4em] text-black">Aura</span>
           </Link>
-          <p className="text-sm mt-3" style={{ color: "hsl(var(--text-muted))" }}>
-            Welcome back! Sign in to your account.
+          <h1 className="text-6xl font-serif-aesthetic text-black/80">
+            Welcome <span className="italic text-[#6B8BA4]">back.</span>
+          </h1>
+          <p className="text-sm mt-4 text-black/60 font-light tracking-wide uppercase tracking-[0.1em]">
+            Access your exclusive event memories
           </p>
         </div>
 
-        {/* Form */}
-        <form
-          onSubmit={handleSubmit}
-          className="glass-strong rounded-2xl p-8 space-y-5"
-          style={{ boxShadow: "var(--shadow-xl)" }}
-        >
-          {error && (
-            <div className="text-sm p-3 rounded-xl text-white" style={{ background: "hsl(var(--error))" }}>
-              {error}
-            </div>
-          )}
+        {/* Form Card */}
+        <div className="bg-white/40 backdrop-blur-3xl border border-white/40 rounded-[3.5rem] p-10 shadow-2xl">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs p-3 rounded-2xl bg-red-500/10 text-red-600 border border-red-500/20 text-center font-bold uppercase tracking-widest">
+                {error}
+              </motion.div>
+            )}
 
-          <div>
-            <label className="text-xs font-semibold mb-1.5 block" style={{ color: "hsl(var(--text-secondary))" }}>
-              Email
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "hsl(var(--text-muted))" }} />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                required
-                className="w-full pl-10 pr-4 py-3 rounded-xl text-sm outline-none transition-all focus:ring-2"
-                style={{
-                  background: "hsl(var(--bg))",
-                  border: "1px solid hsl(var(--border))",
-                  color: "hsl(var(--text))",
-                }}
-              />
+            <div>
+              <label className="text-[10px] uppercase tracking-[0.3em] font-black text-black/40 mb-2 block px-4">
+                Email Address
+              </label>
+              <div className="relative group">
+                <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-black/40 group-focus-within:text-[#6B8BA4] transition-colors" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@gmail.com"
+                  required
+                  className="w-full pl-14 pr-6 py-5 rounded-2xl text-sm bg-white/60 border border-white/50 focus:border-[#6B8BA4] outline-none transition-all shadow-sm placeholder:text-black/20"
+                  suppressHydrationWarning
+                />
+              </div>
             </div>
+
+            <div>
+              <div className="flex justify-between items-center px-4 mb-2">
+                <label className="text-[10px] uppercase tracking-[0.3em] font-black text-black/40 block">
+                    Password
+                </label>
+                <button type="button" className="text-[9px] uppercase tracking-[0.2em] font-bold text-[#6B8BA4] hover:underline" suppressHydrationWarning>
+                    Forgot?
+                </button>
+              </div>
+              <div className="relative group">
+                <Lock className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-black/40 group-focus-within:text-[#6B8BA4] transition-colors" />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••"
+                  required
+                  className="w-full pl-14 pr-6 py-5 rounded-2xl text-sm bg-white/60 border border-white/50 focus:border-[#6B8BA4] outline-none transition-all shadow-sm placeholder:text-black/20"
+                  suppressHydrationWarning
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full group flex items-center justify-center gap-3 py-5 rounded-2xl text-xs font-black uppercase tracking-[0.3em] text-white bg-black hover:bg-black/80 transition-all hover:scale-[1.02] shadow-xl disabled:opacity-50"
+              suppressHydrationWarning
+            >
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Enter Aura <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" /></>}
+            </button>
+          </form>
+
+          <div className="mt-8 text-center">
+            <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-black/40">
+              Don&apos;t have an account?{" "}
+              <Link href="/register" className="text-black hover:underline">
+                Create Account
+              </Link>
+            </p>
           </div>
-
-          <div>
-            <label className="text-xs font-semibold mb-1.5 block" style={{ color: "hsl(var(--text-secondary))" }}>
-              Password
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "hsl(var(--text-muted))" }} />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                className="w-full pl-10 pr-4 py-3 rounded-xl text-sm outline-none transition-all focus:ring-2"
-                style={{
-                  background: "hsl(var(--bg))",
-                  border: "1px solid hsl(var(--border))",
-                  color: "hsl(var(--text))",
-                }}
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-white gradient-bg transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
-          >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Sign In <ArrowRight className="w-4 h-4" /></>}
-          </button>
-
-          <p className="text-center text-sm" style={{ color: "hsl(var(--text-muted))" }}>
-            Don&apos;t have an account?{" "}
-            <Link href="/register" className="font-semibold" style={{ color: "hsl(var(--primary))" }}>
-              Sign Up
-            </Link>
-          </p>
-        </form>
+        </div>
       </motion.div>
     </div>
   );
