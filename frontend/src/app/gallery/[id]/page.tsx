@@ -39,7 +39,7 @@ export default function GuestGalleryPage() {
           const blob = await fetch(face).then(r => r.blob());
           const file = new File([blob], "selfie.jpg", { type: "image/jpeg" });
           const results = await api.public.searchEventsByFace(file);
-          const thisEventMatch = results.find((r: any) => r.event.id === id);
+          const thisEventMatch = results.folders.find((r: any) => r.event.id === id);
           
           if (thisEventMatch) {
             // Fetch the full details of these photos if needed, 
